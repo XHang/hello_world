@@ -8,7 +8,6 @@ package main
 
 import (
 	"fmt"
-	"hello_world/src/hello/demo"
 )
 
 type Tree struct {
@@ -18,13 +17,11 @@ type Tree struct {
 }
 
 func main() {
-	/*var t  Tree
+	var t  Tree
 	arr:=[]int{3,5,1,6,8,1,4,3,1,5}
 	addValues(&t,arr)
-	fmt.Println(Traversing(&t,""))*/
+	fmt.Println(Traversing(&t,""))
 	//
-	d := demo.Abcs()
-	fmt.Print(d)
 
 }
 

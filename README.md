@@ -499,6 +499,8 @@ elem,has:=m["index"]
 
 
 
+
+
 ## 5.9 结构体
 
 啥是结构体
@@ -603,6 +605,14 @@ type Student struct {
 
 但是嵌入和被嵌入并不是真正意义上的继承关系，至少如果参数是User的话，你是无法传Student进去的
 
+## 5.12 结构体Tag
+
+语法：
+
+```
+
+```
+
 
 
 
@@ -666,9 +676,31 @@ type Movie struct {
 
 这个通道主要是用于多线程的通讯的
 
-声明语法
+ **声明语法 **
 
 `ch := make(chan int)`
+
+ **向通道发送值 **
+
+```
+ch <- v    // 将 v 发送至信道 ch。
+```
+
+ **从 ch 接收值并赋予 v **
+
+`v := <-ch `
+
+当通道作为参数时，有几点需要注意
+
+```
+func fetch(url string, ch chan<- string) {
+	//TODO ....
+}
+```
+
+像这样声明的函数的通道形参，只能用于接受数据，而不能拿数据
+
+如果`ch chan<- string`改为` ch<- chan string `  则是可读，但不可写
 
 
 
@@ -1145,8 +1177,70 @@ w = os.Stdout
    这件事告诉我们，左大括号换行的家伙都是异端
 
    另外，别琢磨这个代码了，没人会写这种坑爹的代码的
+   
+3. 比较好用，如果map的value类型不重要，比如说做查表法时，建议map的value用结构体类型
+
+   结构体类型做value类型可以节省内存空间
+
+   想判断key是否存在，可以用`_, has := mapVariable[key]`
+
+   拿到has则可以判断
 
 # 十二:常见方法和调用方式
+
+//TODO 
+
+# 十三：常见工具和使用
+
+## 13. 1 XORM根据表生成结构体
+
+XORM是某人写的一个开源的，go语言专属的ORM框架，既然是ORM框架了，就涉及到数据库表和Model的转化，这里的Model，在go语言叫做结构体
+
+好了，问题来了，怎么使用XORM提供的工具从数据表生成结构体？
+
+1. 使用go get命令下载XORM，并让其自动生成XORM工具的可执行文件，生成的文件大致是`xorm.exe`
+
+   >`go get github.com/go-xorm/cmd/xorm`
+
+2. 将下载下来的源代码中，`templates`文件夹复制到`xorm.exe`文件夹下面
+
+3. 执行命令
+
+   ```
+   xorm reverse mysql userName:password@(ip:port)/dataBase?charset=utf8 templates\goxorm savePath tablename
+   ```
+
+   解释
+
+   tablename 是表名，也可以使用通配符来表示多张表
+
+
+
+## 13.2 easyjson生成结构体json帮助文件
+
+命令很简单
+
+`easyjson -all goPath`
+
+执行完毕后会在goPath上面生成一个xxxxxeasyjson.go的文件
+
+> -all 得加这个参数才行，否则会生成一个辣鸡文件
+
+# 十四 企业开发规范
+
+## 14.1 接受者必要性
+
+在企业开发中，一般的写函数的go文件，都建议加一个接受者，接受者在本go文件内定义，可以不带任何属性
+
+这样做的好处
+
+1. go程序只有包的概念，没有类的概念，为了区分包里面的不同go文件，需要用接受者来区分。
+
+   > 只可惜变量名不行，在做常量时，只能统一写在一个包内了
+
+2. 可读性好，当然前提是接受者命名要恰当
+
+3. 作为隐藏的第三个参数用
 
 # X:末尾 BUG合集
 
