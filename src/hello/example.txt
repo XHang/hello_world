@@ -1,5 +1,0 @@
-java
-c++
-go
-python
-eof
