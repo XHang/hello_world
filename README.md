@@ -718,7 +718,7 @@ def function_name(parameters):
 	statement(s)
 ```
 
-参数值随缘，也就是可选的
+参数值不随缘，必填的
 
 什么，你问函数的返回值是什么？
 
@@ -738,6 +738,70 @@ def function_name(parameters):
 
    当然接受的话，也是按照列表的方式来接受的
 
+   **函数参数**
+   
+   函数参数可以指定一个默认值。指定了默认值的参数在调用时是可选的
+   
+   例子
+   
+   ```
+   def methon4(name=3):
+       print("name is [{}]".format(name))
+   methon4()
+   ```
+   
+   如果默认参数后面还有函数参数，则后面的函数参数也必须设置默认值。
+   
+   嗯，这是动态语言的通病
+   
+   **手动指定形参位置**
+   
+   以前的编程语言，形参和实参的顺序必须一致，现在嘛，Python可以手动指定形参顺序了
+   
+   亮代码
+   
+   ```
+   def methon4(name=3):
+       print("name is [{}]".format(name))
+   
+   
+   methon4(name="safs")
+   ```
+   
+   > 讲真，只是些语法糖而已
+   
+   **可变参数**
+   
+   我就知道有这货
+   
+   亮代码
+   
+   ```
+   def methon5(*names):
+       for name in names:
+           print("hello,{}".format(name))
+   
+   
+   methon5("李大喵", "张全碳", "训悟空")
+   ```
+   
+   > `*`的另一种用法——标记可变参数
+   
+   **匿名函数/Lambda函数**
+   
+   由于在Python中，匿名函数用Lambda定义，所以才有这个别称
+   
+   代码举例
+   
+   ```
+   double = lambda x: x * 2
+   print(double(2))
+   ```
+   
+   未完待续。。。
+   
+   
+   
    
 
 # 四：命令

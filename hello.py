@@ -38,6 +38,19 @@ def method3():
     return 1, 2, 3
 
 
-print(method1())
-print(method2())
-print(method3()[0])
+def methon4(name=3):
+    print("name is [{}]".format(name))
+
+
+methon4(name="safs")
+
+
+def methon5(*names):
+    for name in names:
+        print("hello,{}".format(name))
+
+
+methon5("李大喵", "张全碳", "训悟空")
+
+double = lambda x: x * 2
+print(double(2))
