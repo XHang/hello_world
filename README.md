@@ -237,6 +237,33 @@ x = 3.14j
 
 Python会自己做类型推断
 
+然后介绍一下怎么表示各种进制的数字
+
+| 进制     | 前缀         |
+| :------- | :----------- |
+| 二进制   | '0b' or '0B' |
+| 八进制   | '0o' or '0O' |
+| 十六进制 | '0x' or '0X' |
+
+接下来说一下数字计算的通病，这是所有编程语言都不能绕过的
+
+什么通病：
+
+就是计算机其实无法准确的存储小数
+
+所以对于小数的计算：`1.1 + 2.2`是无法给出正确答案：`3.3`
+
+如果一定要算出上面的结果，可以使用Python的`decimal`模块
+
+使用如下
+
+```
+from decimal import Decimal as D
+print(D('1.1') + D('2.2'))
+```
+
+
+
 ### 3.4.2 列表
 
 也就是java中的集合了，但是神奇的一点的是，Python内的集合的元素不要求是同种类型。
@@ -268,6 +295,116 @@ print(set[1:3])
 
 另外，和绝大多数编程语言一样，只包含头，不包含尾
 
+**列表里面可以包含列表**
+
+```
+n_list = ["Happy", [2,0,1,5]]
+
+# Output: a  取第一个元素，即字符串的第二个字符
+print(n_list[0][1])    
+
+# Output: 5 取第二个元素，即列表的的第4个字符
+print(n_list[1][3])
+```
+
+**列表索引允许负数**
+
+效果是往后索引
+
+**列表里面追加数据**
+
+```
+odd = [1, 3, 5]
+odd.append(7)  # 添加一个元素7
+odd.extend([9, 11, 13])  # 添加一个列表进列表里面
+odd = odd + [9, 7, 5] # 添加一个列表进列表里面
+strArr = ["re"] * 3  
+```
+
+**列表插队**
+
+```
+odd = [1, 9]
+odd.insert(1,3)
+# 最后是 [1, 3, 9]
+```
+
+**列表删除**
+
+```
+my_list = ['p','r','o','b','l','e','m']
+del my_list[2]  # 删除第二个元素
+del my_list[1:5]  
+del my_list  # 整个列表删除，不能再访问
+# remove()  pop()
+# clear() 清空
+```
+
+方法一览
+
+| [**append（）** - 在列表末尾添加一个元素](https://www.programiz.com/python-programming/methods/list/append) |
+| ------------------------------------------------------------ |
+| [**extend（）** - 将列表的所有元素添加到另一个列表中](https://www.programiz.com/python-programming/methods/list/extend) |
+| [**insert（）** - 在定义的索引处插入一个项目](https://www.programiz.com/python-programming/methods/list/insert) |
+| [**remove（）** - 从列表中删除项目](https://www.programiz.com/python-programming/methods/list/remove) |
+| [**pop（）** - 删除并返回给定索引处的元素](https://www.programiz.com/python-programming/methods/list/pop) |
+| [**clear（）** - 从列表中删除所有项目](https://www.programiz.com/python-programming/methods/list/clear) |
+| [**index（）** - 返回第一个匹配项的索引](https://www.programiz.com/python-programming/methods/list/index) |
+| [**count（）** - 返回作为参数传递的项数的计数](https://www.programiz.com/python-programming/methods/list/count) |
+| [**sort（）** - 按升序对列表中的项目进行排序](https://www.programiz.com/python-programming/methods/list/sort) |
+| [**reverse（）** - 反转列表中项目的顺序](https://www.programiz.com/python-programming/methods/list/reverse) |
+| [**copy（）** - 返回列表的浅表副本](https://www.programiz.com/python-programming/methods/list/copy) |
+
+**建立List的另一种方式**
+
+示例
+
+`pow2 = [2 ** x for x in range(10)]`
+
+结果会创建如下列表
+
+```
+[1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
+```
+
+其实就相当于下面这个程序
+
+```
+pow2 = []
+for x in range(10):
+   pow2.append(2 ** x)
+```
+
+一些比较特立独行的例子
+
+```
+pow2 = [2 ** x for x in range(10) if x > 5]
+结果：`[64, 128, 256, 512]`
+[x for x in range(20) if x % 2 == 1]
+结果：`[1, 3, 5, 7, 9, 11, 13, 15, 17, 19]`
+[x+y for x in ['Python ','C '] for y in ['Language','Programming']] 
+结果：`['Python Language', 'Python Programming', 'C Language', 'C Programming']`
+```
+
+**判断元素是否在列表内**
+
+用in关键字
+
+```
+my_list = ['p','r','o','b','l','e','m']
+
+print('p' in my_list)
+```
+
+**遍历列表**
+
+```
+for fruit in ['apple','banana','mango']:
+    print("I like",fruit)
+```
+
+
+
 ### 3.4. Set（集）
 
 同样和上面的三个，都是容器，不过这个容器存放的元素是无序的。
@@ -288,6 +425,10 @@ print(a)
 2. 无序性，当然打印看不出来，但是如果想用索引访问Set，那是白日做梦，痴心妄想。癞蛤蟆。。
 
    > （对不起，偏题了）
+   
+   
+   
+   
 
 
 
@@ -310,19 +451,57 @@ print("a[True]", a[True])
 print("a[None]", a[None])
 # runtime error KeyError: 'x' 因为key不存在，就会报这个错误
 # print("not exist", a["not exist"])
+# 像这种情况可以用get方法 ,如果不存在，是none
+print("not exist", a.get("not exist"))
 a[1] = 33
 
 print("changed a[1] is", a[1])
 
+
 ```
 
-特性：
-
-1. 可以允许重复的Key，但以最后一个为准
-2. 不能查不存在的Key（那我要这字典有何用？？？）
-3. 字典可以随意更改
+特性：没有，与Map雷同
 
 我觉得不应该叫它字典，它明明就是一个不支持查无操作的Map啊！
+
+支持的方法(由自身调用)
+
+1. pop(key)  删除一个key-value 返回该value
+2. `popitem()`随机删除一个key，并返回它的value
+3. clear()  清空字段
+4. del 删除这个字典等
+
+**通过反人类的循环语法创建字典**
+
+```
+squares = {x: x*x for x in range(6)}
+
+# Output: {0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
+print(squares)
+```
+
+
+
+**迭代字典**
+
+```
+squares = {1: 1, 3: 9, 5: 25, 7: 49, 9: 81}
+for i in squares:
+    print(squares[i])
+```
+
+
+
+**使用in  或者  not in 操作符判断key是否存在**
+
+```
+squares = {1: 1, 3: 9, 5: 25, 7: 49, 9: 81}
+print(1 in squares)
+```
+
+
+
+
 
 
 
@@ -341,7 +520,30 @@ tupleInstance = (1, 2, "this is tuple", "nothing")
 # 以下代码运行时报错  'tuple' object does not support item assignment
 # tupleInstance[1] = 1
 print(tupleInstance)
+# 以下不用括号来建立元祖
+my_tuple = 3, 4.6, "dog"
+# 由于上面这个特性和其他定义变量的形式冲突，所以如果你想用上面这种形式建立元祖
+my_tuple = ("hello",)
+my_tuple = "hello",
+需要在后面加`,`，不然的话，编译器会错认类型是string
 ```
+
+元祖支持`+`  `*`操作符
+
+示例
+
+```
+a = ((1, 2, 3) + (4, 5, 6))
+# 上面将新增一个元祖：(1, 2, 3, 4, 5, 6)
+b = ("Repeat",) * 3
+# 上面将新增一个元祖：(('Repeat', 'Repeat', 'Repeat')
+```
+
+元祖的优点
+
+1. 迭代比list快
+2. 元祖可以作为字典的Key,List不可以
+3. 
 
 ### 3.4.5 空类型
 
@@ -427,6 +629,170 @@ Python的字符串加了很多特技
 
 这个就不演示了，超简单
 
+Python的字符串其实相当于元祖了，元祖能用方法，它一般也能用
+
+**如何在字符串中存储`""`**
+
+1. 使用转义字符
+
+   > a = '''He said, "What's there?"'''
+
+2. 使用三引号
+
+   > ```
+   > a = 'He said, "What\'s there?"'
+   > 
+   > a = "He said, \"What's there?\""
+   > ```
+
+3. 
+
+### 3.4.8 数组
+
+Python也有数组，不过相对来说，它的存在感薄弱。
+
+如何创建它呢？
+
+```
+import array as arr
+a = arr.array('d', [1.1, 3.5, 4.5])
+print(a)
+```
+
+数组终于像其他编程语言一样，只能存储特定类型的元素了
+
+怎么说，唔，你得在前面写上一个标识符，标识这个数组，存的是什么元素。
+
+比如说上面的`d`，就是告示解释器，这个数组存double类型的数据
+
+除了`d`外，你还可以用其他标识符，来看一看吧
+
+| Code  | C 语言类型     | Python Type | 最小字节 |
+| :---- | :------------- | :---------- | :------- |
+| `'b'` | signed char    | int         | 1        |
+| `'B'` | unsigned char  | int         | 1        |
+| `'u'` | Py_UNICODE     | Unicode     | 2        |
+| `'h'` | signed short   | int         | 2        |
+| `'H'` | unsigned short | int         | 2        |
+| `'i'` | signed int     | int         | 2        |
+| `'I'` | unsigned int   | int         | 2        |
+| `'l'` | signed long    | int         | 4        |
+| `'L'` | unsigned long  | int         | 4        |
+| `'f'` | float          | float       | 4        |
+| `'d'` | double         | float       | 8        |
+
+数组长度可扩充，其他的，自己扩展吧
+
+一般不建议使用数组，唔。教程说的
+
+
+
+### 3.4.9 矩阵
+
+矩阵是一种二维数据，里面的数据排列成列和行
+
+Python内置类型没有矩阵，不过我们可以自己造一个。。。
+
+用嵌套List的方式
+
+```
+A = [[1, 4, 5], 
+    [-5, 8, 9]]
+```
+
+可以视它是二行三列的矩阵
+
+对矩阵的一些使用
+
+```
+A = [[1, 4, 5, 12], 
+    [-5, 8, 9, 0],
+    [-6, 7, 11, 19]]
+
+print("A =", A) # 打印整个矩阵
+print("A[1] =", A[1])      # 打印矩阵的第二行
+print("A[1][2] =", A[1][2])   # 打印矩阵的第二行的第三个元素
+print("A[0][-1] =", A[0][-1])   # 打印矩阵的第一行，最末列的元素
+# 以下代码选择矩阵每行的第三个元素，形成新的list
+column = [];        # empty list
+for row in A:
+  column.append(row[2])   
+
+print("3rd column =", column)
+```
+
+**转置矩阵**
+
+所谓转置矩阵，就是把原来矩阵的行，变成列，把原本的列，变成行
+
+```
+[
+[12,7],
+[4 ,5],
+[3 ,8]
+]
+```
+
+转置后，变成
+
+```
+[12,4,3] 
+[7,5,8]
+```
+
+**矩阵乘法**
+
+两个矩阵相乘，得左边矩阵的列数和右边矩阵的行数匹配，相乘才有意义
+
+
+
+
+
+**用NumPy开源包创建矩阵**
+
+虽然用嵌套list可以创建矩阵，然而这也太原始了，让我为你介绍新的工具
+
+`NumPy`
+
+这货是一个科学计算的开源包，建立N维的矩阵不在话下
+
+不过你得先下载它，唔，关于怎么下载嘛，看下面的软件包下载吧
+
+**用法1：创建多维数组**
+
+```
+A = np.array([[1, 2, 3], [3, 4, 5]])
+print(A)
+
+A = np.array([[1.1, 2, 3], [3, 4, 5]])  # Array of floats
+print(A)
+
+A = np.array([[1, 2, 3], [3, 4, 5]], dtype=complex)  # 里面的元素是复数
+print(A)
+```
+
+**创建元素是0的多维数组**
+
+```
+zeors_array = np.zeros( (2, 3) )
+```
+
+这将生成如下的矩阵
+
+```
+ [[0. 0. 0.]
+  [0. 0. 0.]]
+```
+
+**创建元素是1的矩阵**
+
+```
+ones_array = np.ones( (1, 5), dtype=np.int32 ) 
+```
+
+
+
+
 
 
 ### 3.4.x其他
@@ -447,6 +813,34 @@ print(isinstance(a, int))
 <class 'int'>
 True
 ```
+
+**通用容器方法**
+
+这里的通用容器指的是一维数组和衍生品
+
+它们都支持
+
+1. 求并集  把两个集合用`|`  得到新的集合，其实就是两个集合啦
+
+2. 求交集，把两个集合用`&` 得到新的交集
+
+3. 求差集，用`-`联合两个集合
+
+   ```
+   A = {1, 2, 3, 4, 5}
+   B = {4, 5, 6, 7, 8}
+   print(A - B)
+   ```
+
+   结果生成A集合里面，不属于交集部分的集合。也就是`{1, 2, 3}`
+
+4. 求对称差，把两个集合用`^`得到的新集合
+
+   结果是两个集合，不包括交集部分
+
+5. 
+
+
 
 ## 3. 类型转换
 
@@ -962,6 +1356,16 @@ arg参数是可选的，它仅作为输入的提示，显示在控制台上。
 
 
 
+## 5.6 type()函数
+
+得到该变量是什么类型的函数
+
+## 5.7 isinstance()函数
+
+得到该变量是否属于此类型的函数
+
+
+
 # 六： 相关警告输出
 
 1. `shadows built-in name`  内置名称，避免歧义，不要用内置名称作为变量名
@@ -1085,6 +1489,209 @@ print(a)
    如果处在局部变量上，这个局部变量摇身一变会变成全局变量
 
    即使这个变量名，在此之间，并没有在全局变量上声明过
+
+   
+   
+   
+   
+# 九：安装开源包
+
+类比`java`的`maven`和`go`的`go get `
+
+Python也与时俱进的提出了pip思想,它是Python的软件包安装程序
+
+一般来说，高版本的Python已经包含了这个东西，我们不需要再安装它了
+
+蛤，它可以安装托管在Python包索引的开源包
+
+使用示例
+
+`python -m pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose`
+
+它可以安装`numpy `开源包
+
+
+
+简单的功能有
+
+1. `pip install name` 根据软件包的名称来安装软件包，需要网络连接
+
+   如果本地已经下载了安装包，可以`pip install path`来安装它
+
+2. 显示你安装了哪些软件包
+
+   ```
+   pip show --files SomePackage
+   ```
+
+3. 看看你哪些软件包已经outdated
+
+   `pip list --outdated`
+
+4. 升级包
+
+   ```
+   pip install --upgrade SomePackage
+   ```
+
+   一个叫做`SomePackage`的包得到升级啦
+
+5. 卸载包
+
+   ```
+   pip uninstall SomePackage
+   ```
+
+# 十：文件操作
+
+Python怎么能少了文件操作呢？
+
+## 10.1 打开文件
+
+在Python中，打开一个文件的代码如下所示
+
+```
+f = open("test.txt")
+```
+
+这将返回一个文件对象，也叫句柄
+
+默认是以文本方式打开的，且是只读，当然我们可以在打开文件时指定
+
+指定的方式如下
+
+```
+f = open("test.txt",'w')
+```
+
+用一个`w`来标识打开的文件用于写，如果文件不存在，会创建该文件，如果文件存在，则会覆盖文件
+
+其他的标识符有
+
+| Mode | Description                                                  |
+| :--- | :----------------------------------------------------------- |
+| 'r'  | 已只读方式打开文件，这是默认选项                             |
+| 'w'  | 以写方式打开文件，如果文件存在，则覆盖，如果文件不存在，则创建该文件 |
+| 'x'  | 以独占方式创建该文件。如果文件存在，抛出异常                 |
+| 'a'  | 以写方式打开该文件，所做的修改将追加在文件末尾，而不会覆盖   |
+| 't'  | 以文本模式打开文件                                           |
+| 'b'  | 以二进制方式打开文件                                         |
+| '+'  | 以读写方式打开文件                                           |
+
+在文本方式打开文件时，强烈建议制定一个文件编码，不然会依据平台的默认编码打开文件。
+
+如何制定
+
+```
+f = open("test.txt",mode = 'r',encoding = 'utf-8')
+```
+
+## 10.2 如何关闭文件
+
+很简单，用句柄对象的CLose方法
+
+```
+f = open("test.txt",encoding = 'utf-8')
+# perform file operations
+f.close()
+```
+
+更好的写法是
+
+```
+try:
+   f = open("test.txt",encoding = 'utf-8')
+   # perform file operations
+finally:
+   f.close()
+```
+
+`finally:`块里面的代码可以保证一定会执行，所以不必担心中途遇到异常，程序退出，但是资源没释放
+
+终极写法是
+
+```
+with open("test.txt",encoding = 'utf-8') as f:
+   # perform file operations
+```
+
+你完全不用写关闭文件的代码，Python会自动帮你关闭
+
+## 10.3 如何写入文件
+
+打开文件时，需要指定好正确的打开方式
+
+```
+with open("test.txt",'w',encoding = 'utf-8') as f:
+   f.write("my first file\n")
+   f.write("This file\n\n")
+   f.write("contains three lines\n")
+```
+
+   蛮糟糕的一点是，换行符需要你自己输入。。
+
+## 10.4 如何读取文件
+
+```
+>>> f = open("test.txt",'r',encoding = 'utf-8')
+>>> f.read(4)    # 读取首四个字符
+
+>>> f.read(4)    # 再读取下面四个字符
+
+
+>>> f.read()     # 一次性全部读取
+
+
+>>> f.read()  # 如果文件已经被读取完，再次调用它只会返回空串
+```
+
+其他方法
+
+1. `tell()`    告诉你当前读取到第几个字符了
+2. `seek(0)` 更改读取的位置，这里0,就是从0开始读取了
+3. `readline()`
+
+
+
+中级读取文件大法：循环法
+
+```
+ for line in f:
+     print(line, end = '')
+     #  end = ''  可以避免再打印一个换行符，因为文件里面本身就存在换行符了
+结果是：
+This is my first file
+This file
+contains three lines
+```
+
+
+
+
+
+
+
+## 11. 数学
+
+### 11.1向量
+
+对于物理学来说，向量就是有长度，有方向的箭头
+
+对于程序员来说，向量就是一维数组，可以用它来描述一维空间的位置
+
+比如【1,2】就是建立一个直角坐标系，X轴坐标为1，Y轴坐标为2的点
+
+**向量的加法**
+
+假设有两个向量
+
+`[1,2]`  `[2,3]`
+
+其两个向量的加法就是`[3,5]`,也就是X轴坐标相加，Y轴坐标相加
+
+为什么会这么算呢？
+
+
 
    
 
