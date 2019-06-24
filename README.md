@@ -1542,11 +1542,13 @@ Python也与时俱进的提出了pip思想,它是Python的软件包安装程序
    pip uninstall SomePackage
    ```
 
-# 十：文件操作
+# 十：文件系统操作
 
 Python怎么能少了文件操作呢？
 
-## 10.1 打开文件
+## 10.1 文件操作
+
+### 10.1.1 打开文件
 
 在Python中，打开一个文件的代码如下所示
 
@@ -1586,7 +1588,7 @@ f = open("test.txt",'w')
 f = open("test.txt",mode = 'r',encoding = 'utf-8')
 ```
 
-## 10.2 如何关闭文件
+### 10.1.2 如何关闭文件
 
 很简单，用句柄对象的CLose方法
 
@@ -1617,7 +1619,7 @@ with open("test.txt",encoding = 'utf-8') as f:
 
 你完全不用写关闭文件的代码，Python会自动帮你关闭
 
-## 10.3 如何写入文件
+### 10.1.3 如何写入文件
 
 打开文件时，需要指定好正确的打开方式
 
@@ -1630,7 +1632,7 @@ with open("test.txt",'w',encoding = 'utf-8') as f:
 
    蛮糟糕的一点是，换行符需要你自己输入。。
 
-## 10.4 如何读取文件
+### 10.1.4 如何读取文件
 
 ```
 >>> f = open("test.txt",'r',encoding = 'utf-8')
@@ -1665,37 +1667,495 @@ This file
 contains three lines
 ```
 
+## 10.2 文件夹操作
+
+直接列出方法（os模块）
+
+1. `getcwd()`  得到当前的工作文件夹
+
+2. `chdir(str)` 输入一个文件夹路径以变更工作目录
+
+3. `listdir(str)`列出指定文件夹里面的文件和文件夹列表
+
+   如果不传参数，默认是工作目录
+
+4. mkdir(str) 创建文件夹
+
+5. rename(original，newName)  能变更文件夹名字
+
+6. remove()删除文件
+
+7. `rmdir()`删除一个空目录
+
+   > 目录必须为空，不为空删除不了
+
+8. `shutil.rmtree()`  这个不是OS模块的方法，但是它可以删除非空的文件夹
+
+
+
+
+# 十一：Python里面的异常机制
+
+Python的异常有两种
+
+1. 一种是语法错误或解析错误，类似于编译错误
+2. 一种是运行时错误，被称为异常，Python里面存在许多这种内置异常
+
+## 11.1 内置异常
+
+Python有多少种内置异常呢？
+
+调用这个方法一看究竟
+
+`locals()['__builtins__']`
+
+Python有哪些常见的内置异常呢？
+
+| 异常名                | 异常                                                         |
+| :-------------------- | :----------------------------------------------------------- |
+| AssertionError        | y由于`assert` 语句断言失败                                   |
+| AttributeError        | 属性赋值或者访问时失败                                       |
+| EOFError              | 读到预料之外的文件结尾                                       |
+| FloatingPointError    | 浮点数运算失败                                               |
+| GeneratorExit         | 调用自动生成的close函数失败                                  |
+| ImportError           | 不能找到导入的模块                                           |
+| IndexError            | 索引越界                                                     |
+| KeyError              | 字典中不存在该key                                            |
+| KeyboardInterrupt     | 用户键入中断键，Ctrl+C或者del键时会触发该错误                |
+| MemoryError           | 操作耗尽内存啦                                               |
+| NameError             | 当变量在本地和全局范围没有找到时引发                         |
+| NotImplementedError   | 从抽象方法抛出                                               |
+| OSError               | 系统操作导致系统相关错误时引发                               |
+| OverflowError         | 当运算的结果太大导致无法显示引发                             |
+| ReferenceError        | Raised when a weak reference proxy is used to access a garbage collected referent. |
+| RuntimeError          | 当错误不属于任何一种类型时引发                               |
+| StopIteration         | 调用next方法，但是已经没有更多的迭代项，由此引发             |
+| SyntaxError           | 遇到语法错误由解析器引发                                     |
+| IndentationError      | 不正确的缩进语法                                             |
+| TabError              | 缩进由不一致的tab和空格引发                                  |
+| SystemError           | 解释器遇到内部错误                                           |
+| SystemExit            | 由sys.exit()函数抛出                                         |
+| TypeError             | 当函数或者操作应用不正确的类型引发                           |
+| UnboundLocalError     | Raised when a reference is made to a local variable in a function or method, but no value has been bound to that variable. |
+| UnicodeError          | 当遇到Unicode相关的，解码和编码操作时引发                    |
+| UnicodeEncodeError    | 在编码期间发生与Unicode相关的错误时引发。                    |
+| UnicodeDecodeError    | 在解码期间发生与Unicode相关的错误时引发。                    |
+| UnicodeTranslateError | Raised when a Unicode-related error occurs during translating. |
+| ValueError            | 不恰当的函数值，比如强转传入的值。                           |
+| ZeroDivisionError     | 当除法或模的操作，第二个操作数为0时引发                      |
+
+除了以上系统内置的异常，我们还可以定义自己的异常
+
+## 11.2 用户自定义的异常
+
+自定义异常，需要创建新类，该类必须是`Exception`的子类
+
+扔出代码
+
+```
+class CustomerException(Exception):
+    pass
+
+
+try:
+    raise CustomerException("fuck 辣妹儿")
+except:
+    print("异常发生了哦")
+finally:
+    print("扫尾工作")
+```
 
 
 
 
 
 
-## 11. 数学
 
-### 11.1向量
+## 11.3 处理异常
 
-对于物理学来说，向量就是有长度，有方向的箭头
+在Python里面，异常可以由自己处理，也可以一级级的向上抛出，直至解释器打印出异常，并中断程序的执行
 
-对于程序员来说，向量就是一维数组，可以用它来描述一维空间的位置
+怎么处理异常，使用try...except.....来捕获并处理特定异常
 
-比如【1,2】就是建立一个直角坐标系，X轴坐标为1，Y轴坐标为2的点
+代码示例
 
-**向量的加法**
+```
+randomList = ['a', 0, 2]
 
-假设有两个向量
+for entry in randomList:
+    try:
+        print("即将除与", entry)
+        r = 1 / int(entry)
+        break
+    except:
+        print("Oops!", sys.exc_info()[0], "occured.")
+        print("下一个被除数.")
+        print()
+    finally:
+    	# 释放资源用，总是会执行到
+    	pass
+print("The reciprocal of", entry, "is", r)
+```
 
-`[1,2]`  `[2,3]`
+可以预料的是，这个程序会出现两个异常
 
-其两个向量的加法就是`[3,5]`,也就是X轴坐标相加，Y轴坐标相加
+1. `a` 不能转成数字，报的是`ValueError`
+2. 不能除与0，报的是`ZeroDivisionError`
 
-为什么会这么算呢？
+在这个程序中，我们调用了` sys.exc_info()[0]`代码来打印错误类型，其实在里面，我们还可以打印更多信息
+
+因为`sys.exc_info()`  返回的是一个列表之类的东西。
+
+经验证，
+
+第零个元素就是错误类型
+
+第一个元素就是引发错误的原因。
+
+第二个元素是内存跟踪（不确定）
+
+**处理异常的方式-升级版**
+
+```
+randomList = ['a', 0, 2]
+
+for entry in randomList:
+    try:
+        print("即将除与", entry)
+        r = 1 / int(entry)
+        break
+    except (ValueError, ZeroDivisionError):
+        print("Oops!", sys.exc_info()[0], "occured.")
+        print("下一个被除数.")
+        print()
+    except:
+        print("其他异常捕捉", sys.exc_info()[0])
+print("The reciprocal of", entry, "is", r)
+```
+
+明确捕捉特定的异常。
+
+**手动抛出异常**
+
+代码示例
+
+```
+
+try:
+    raise ValueError("手动写BUG,就问你怕不怕")
+    # raise KeyboardInterrupt
+except (ValueError, ZeroDivisionError):
+    print("Oops!", sys.exc_info()[0], "occured.")
+    print("下一个被除数.")
+    print()
+except:
+    print("其他异常捕捉", sys.exc_info()[0])
+```
 
 
 
-   
+# 十二：Python对象
+
+一个对象有两个特征
+
+1. 属性
+2. 行为
+
+Python支持面向对象编程的几个特点
+
+1. 继承
+2. 封装
+3. 多态
+
+## 12. 1 构建类
+
+要想创建一个对象，首先要创建类
+
+在Python里面，类的代码大致如下
+
+```
+class Parrot:
+
+	"this is class doc desc "
+	
+    species = "bird"
+
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    pass
+```
+
+这就创建了一个类，里面有一个类属性`species`
+
+还有一个构造函数`__init__`，里面传入两个参数，作为对象的属性
+
+> 对，你没看错，对象的属性是在构造函数才定义的，和java的有所不同
+>
+> 莫名觉得这才是正确的方式。。
+
+> 当我们定义一个类，就会创建与该类有相同名称的类对象，并分配一个类独有的命名空间。
+>
+> 然后这个类对象允许我们访问类属性（类名.类属性访问），以及实例化该类的对象
+
+使用类的方法创建一个对象
+
+```
+
+a = Parrot(name="小鹦鹉", age=14)
+# 直接打印对象属性
+print(a.name)
+# 拿到对象所属的类，再拿到类属性
+print(a.__class__.species)
+
+a.temp = "这是一个临时对象属性"
+```
+
+**可以在对象创建之后，再动态定义对象的属性**
+
+上面在创建类的过程中，顺带介绍了属性，还有方法没介绍
+
+```
+class Parrot:
+    species = "bird"
+
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def sing(self, song):
+        print("一个名为", self.name, "的小鸟正在引吭高歌：", song)
+
+    pass
 
 
+a = Parrot(name="小鹦鹉", age=14)
+print(a.name)
+a.sing("鸡你太美")
+```
+
+可以看到特殊的一点是，方法的第一个参数始终是self，但是实际上我们没有传入这个参数，或者说它不是必传的
+
+其实这个参数，就是调用这个方法的对象，默认对象调用方法时，自动传入的。
+
+也就是说
+
+`a.sing("鸡你太美")`等同于`Parrot.sing(a,"鸡你太美")`
+
+有点类似于golang接受者的概念,只不过接受者的位置不一样罢了
+
+对了`self`可以起其他名称，不过不建议，除非你想报复社会
+
+**删除对象，删除属性**
+
+可以用del（它真是万能的方法。。）
+
+值得注意的是，del的对象和属性，并不会在内存中直接删除，而是存活一段时间，等GC删除
+
+
+
+## 12.2 继承类
+
+亮出代码
+
+this parent class
+
+```
+class bird:
+
+    def __init__(self):
+        print("鸟准备好了")
+
+    def sing(self, song):
+        print("鸟在叫，" + song + ",人坏掉")
+
+    def fly(self):
+        pass
+
+    pass
+```
+
+this is child class
+
+```
+
+class penguin(bird):
+    def __init__(self):
+     	super().__init__()
+        print("企鹅蓄势待发")
+
+    def fly(self):
+        print("阿勒，企鹅这么飞来着")
+```
+
+use case
+
+```
+p = penguin()
+# call parent class methon
+p.sing(song="哼哼哼")
+# call child class methon
+p.fly()
+```
+
+几个特点
+
+1. Python所有类都继承自object
+2. `isinstance()`用于判断第一个参数（对象）是不是第二个参数（类）的类对象或者子类对象
+3. `issubclass()`用于判断第一个参数是否是第二个参数的子类
+4. Python里面的类允许继承多个（它有多个老爸）
+
+## 12.3 封装（访问权限符）
+
+对于Python类里面的某些属性，我们可以在属性名前面加前缀`__`来标识它只能在对象内部使用
+
+不能在外部访问，也不能在外部修改
+
+代码示例
+
+```
+class person:
+    def __init__(self):
+        self.__wife = "xt"
+
+    def showWife(self):
+        print("my wife is {}".format(self.__wife))
+
+    def changeWife(self, wife):
+        self.__wife = wife
+
+
+p = person()
+# this code will raise error
+# print("try access wife of p", p.__wife)
+print("try change wife of p")
+p.__wife = "lzp"
+p.showWife()
+print("real change wife ")
+p.changeWife("not object found !")
+p.showWife()
+```
+
+## 12.4 多态
+
+Python变量可是号称万物都可容纳，接受一个区区的类对象有何不可。
+
+直接给代码
+
+```
+class parrot:
+    def fly(self):
+        print("look I can Fly,you see see you")
+
+    def swim(self):
+        print("look ,I ...I .. can't swim")
+
+
+class penguin:
+    def fly(self):
+        print("I can't fly ,because I is pengui")
+
+    def swim(self):
+        print("I can swim ,you see you")
+
+
+# 通用方法，参数可接受一切鸟类
+def fly(bird):
+    bird.fly()
+
+
+p = parrot()
+fly(p)
+p = penguin()
+fly(p)
+
+```
+
+## 12.5 重载方法，重载操作符
+
+额，我想说的重载不是简单的重载父类方法，而是重载内置函数
+
+比如，在类里面，我们可以重载`__str_`来改变默认的对象字符串表现形式
+
+如果你不重载这个方法，打印对象，会展现这个鬼东西
+
+```
+__main__.point object at 0x00A54C50
+```
+
+多难看啊，你说是不
+
+代码示例
+
+```
+class point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    # 重载字符串表现形式方法，print(instance)可见效果
+    def __str__(self):
+        return "self x is {} y is {}".format(self.x, self.y)
+
+    # 重载+运算符，将两个对象+起来，将得到一个新的对象
+    def __add__(self, other):
+        return point(self.x + other.x, self.y + other.x)
+
+
+p1 = point(1, 2)
+p2 = point(3, 4)
+print(p1)
+print(p1 + p2)
+
+```
+
+其他操作符重载函数
+
+| Operator            | Expression | Internally          |
+| :------------------ | :--------- | :------------------ |
+| Addition            | p1 + p2    | p1.__add__(p2)      |
+| Subtraction         | p1 - p2    | p1.__sub__(p2)      |
+| Multiplication      | p1 * p2    | p1.__mul__(p2)      |
+| Power               | p1 ** p2   | p1.__pow__(p2)      |
+| Division            | p1 / p2    | p1.__truediv__(p2)  |
+| Floor Division      | p1 // p2   | p1.__floordiv__(p2) |
+| Remainder (modulo)  | p1 % p2    | p1.__mod__(p2)      |
+| Bitwise Left Shift  | p1 << p2   | p1.__lshift__(p2)   |
+| Bitwise Right Shift | p1 >> p2   | p1.__rshift__(p2)   |
+| Bitwise AND         | p1 & p2    | p1.__and__(p2)      |
+| Bitwise OR          | p1 \| p2   | p1.__or__(p2)       |
+| Bitwise XOR         | p1 ^ p2    | p1.__xor__(p2)      |
+| Bitwise NOT         | ~p1        | p1.__invert__()     |
+
+你以为这样就没了，年轻！还有逻辑运算符重载啊
+
+```
+class Point:
+    def __init__(self, x = 0, y = 0):
+        self.x = x
+        self.y = y
+    
+    def __str__(self):
+        return "({0},{1})".format(self.x,self.y)
+    
+    def __lt__(self,other):
+        self_mag = (self.x ** 2) + (self.y ** 2)
+        other_mag = (other.x ** 2) + (other.y ** 2)
+        return self_mag < other_mag
+Point(1,1) < Point(-2,-3)
+```
+
+再来一个逻辑运算符重载函数
+
+| Operator                 | Expression | Internally    |
+| :----------------------- | :--------- | :------------ |
+| Less than                | p1 < p2    | p1.__lt__(p2) |
+| Less than or equal to    | p1 <= p2   | p1.__le__(p2) |
+| Equal to                 | p1 == p2   | p1.__eq__(p2) |
+| Not equal to             | p1 != p2   | p1.__ne__(p2) |
+| Greater than             | p1 > p2    | p1.__gt__(p2) |
+| Greater than or equal to | p1 >= p2   | p1.__ge__(p2) |
 
 
 
