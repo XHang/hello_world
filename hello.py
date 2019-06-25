@@ -1,18 +1,18 @@
-class point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+class user:
+    def __init__(self):
+        self.name = ""
 
-    # 重载字符串表现形式方法，print(instance)可见效果
-    def __str__(self):
-        return "self x is {} y is {}".format(self.x, self.y)
+    @property
+    def name(self):
+        print("即将获取", "  name值")
+        return self._name
 
-    # 重载+运算符，将两个对象+起来，将得到一个新的对象
-    def __add__(self, other):
-        return point(self.x + other.x, self.y + other.x)
+    @name.setter
+    def name(self, name):
+        print("即将设置", "name值")
+        self._name = name
 
 
-p1 = point(1, 2)
-p2 = point(3, 4)
-print(p1)
-print(p1 + p2)
+u = user()
+u.name = "王兰花"
+print(u.name)

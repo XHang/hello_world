@@ -1220,6 +1220,26 @@ def function_name(parameters):
    
    > `*`的另一种用法——标记可变参数
    
+   **关键字参数**
+   
+   在函数定义上，你可以在函数的形参上使用关键字参数。
+   
+   该参数允许调用这传入零个或多个带参数名的参数，而在函数内，这个传来的参数会变成dict，也就是字段
+   
+   举例
+   
+   ```
+   def showParameter(**kw):
+       print("parameter:", kw)
+   
+   
+   showParameter(name="fuck", value="cao")
+   ```
+   
+   
+   
+   
+   
    **匿名函数/Lambda函数**
    
    由于在Python中，匿名函数用Lambda定义，所以才有这个别称
@@ -1363,6 +1383,44 @@ arg参数是可选的，它仅作为输入的提示，显示在控制台上。
 ## 5.7 isinstance()函数
 
 得到该变量是否属于此类型的函数
+
+
+
+## 5.8 拷贝函数
+
+拷贝函数可以浅拷贝和深拷贝一个对象
+
+拷贝函数需要导入`copy`模块
+
+使用示例
+
+```
+import copy
+
+old_list = [[1, 1, 1], [2, 2, 2], [3, 3, 3]]
+new_list = copy.deepcopy(old_list)
+
+old_list[1][0] = 'BB'
+
+print("Old list:", old_list)
+print("New list:", new_list)
+```
+
+
+
+```
+import copy
+
+old_list = [[1, 1, 1], [2, 2, 2], [3, 3, 3]]
+new_list = copy.copy(old_list)
+
+old_list[1][1] = 'AA'
+
+print("Old list:", old_list)
+print("New list:", new_list)
+```
+
+
 
 
 
@@ -1914,6 +1972,16 @@ a.temp = "这是一个临时对象属性"
 
 **可以在对象创建之后，再动态定义对象的属性**
 
+> 你知道吗，当你在用`对象.属性名`访问对象的属性时，其实内部在用对象的`__dict__`字典中搜索有该属性名的值。
+>
+> 换句话说
+>
+> a.temp
+>
+> 等价于
+>
+> `a.__dict__["temp"]`
+
 上面在创建类的过程中，顺带介绍了属性，还有方法没介绍
 
 ```
@@ -2157,7 +2225,377 @@ Point(1,1) < Point(-2,-3)
 | Greater than             | p1 > p2    | p1.__gt__(p2) |
 | Greater than or equal to | p1 >= p2   | p1.__ge__(p2) |
 
+## 12.6 类的高级特性
 
+这个特性可以让
+
+你在访问类的属性时，实际是访问类的Get方法
+
+你在设置类的属性时，实际是访问类的Set方法
+
+show code
+
+```
+class user:
+    def __init__(self):
+        self.name = ""
+
+    def setName(self, name):
+        print("即将设置", "name值")
+        self._name = name
+
+    def getName(self):
+        print("即将获取", "  name值")
+        return self._name
+
+    name = property(getName, setName)
+
+
+u = user()
+u.name = "王兰花"
+print(u.name)
+```
+
+实际结果如下
+
+```
+即将设置 name值
+即将设置 name值
+即将获取   name值
+王兰花
+```
+
+更高级的写法
+
+```
+class user:
+    def __init__(self):
+        self.name = ""
+
+    @property
+    def name(self):
+        print("即将获取", "  name值")
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        print("即将设置", "name值")
+        self._name = name
+
+
+u = user()
+u.name = "王兰花"
+print(u.name)
+```
+
+
+
+
+
+# 十二：迭代器
+
+迭代器其实是一种设计范式。
+
+它主要提供两个或三个方法，`next`和`iter`，或者还有`hasNext`
+
+在Python实现迭代器，可以使用最原始的迭代器思想，一个个next，直到结束。
+
+或者也可以将迭代器用在for循环上，与`java`的高级for循环一样
+
+不比比了，亮代码
+
+```
+class PowTwo:
+    """Class to implement an iterator
+    of powers of two"""
+	# 创建迭代器
+    def __init__(self, max = 0):
+        self.max = max
+	# 得到迭代器自身。并重置迭代次数
+    def __iter__(self):
+        self.n = 0
+        return self
+	# 获取下一个元素
+    def __next__(self):
+        if self.n <= self.max:
+            result = 2 ** self.n
+            self.n += 1
+            return result
+            # 如果没有更多元素，抛出此异常
+        else:
+            raise StopIteration
+```
+
+一般的用法
+
+```
+>>> a = PowTwo(4)
+>>> i = iter(a)
+>>> next(i)
+1
+>>> next(i)
+2
+>>> next(i)
+.....
+```
+
+学霸的用法
+
+```
+ for i in PowTwo(5):
+	   print(i)
+```
+
+**生成器，定义迭代器的另一种方式**
+
+在Python函数中，如果出现了`yield`语句，则这个函数可以作为生成器使用。
+
+定义代码如下
+
+```
+def my_gen():
+    n = 1
+    print('This is printed first')
+    # Generator function contains yield statements
+    yield n
+
+    n += 1
+    print('This is printed second')
+    yield n
+
+    n += 1
+    print('This is printed at last')
+    yield n
+```
+
+> 在每一个调用这个生成器的next方法时，实际上就进入了这个方法体
+
+> 这个方法体会在执行起来，直至遇到`yield`语句，就会把该语句后面的值丢出去，并暂停执行
+
+> 下次再执行`next`方法时，代码会从上一次中断的地方开始。
+
+这个函数并不能直接调用，正确的使用方法是
+
+```
+a = my_gen()
+next(a)
+next(a)
+next(a)
+```
+
+或者更高级用法
+
+```
+for i in my_gen():
+    print(i)
+```
+
+解释一下：
+
+`my_gen()`这个语句会创建一个迭代器对象。里面默认含有next方法
+
+```
+def _next_(slef):
+	.....
+```
+
+所以你可以这么用`next(a)`   或是`for i in my_gen()`  或者`a.__next__()`
+
+用这张方式创建的一个迭代器对象，只能迭代一次，想再迭代一次，需要再调用这个代码`my_gen()`
+
+**生成器也有表达式**
+
+总体来说，类似于列表的表达式，只不过`[]`用`()`代替
+
+举例子
+
+```
+my_list = [1, 3, 6, 10]
+# 用列表表达式创建了一个新的列表
+[x**2 for x in my_list]
+# 用生成器表达式创建了一个生成器
+a = (x**2 for x in my_list)
+next(a)
+next(a)
+next(a)
+
+```
+
+当生成器作为参数传递给函数时，`()`可以忽略
+
+比如说
+
+```
+sum(x**2 for x in my_list)
+```
+
+**使用生成器创建迭代对象的好处**
+
+1. 简单，代码量小
+
+   弄一个传统的迭代器，你得弄一个类，实现两个方法
+
+   但是用生成器，你一个方法就搞定了
+
+   > 虽然它并不能像真正的方法一样调用
+
+
+
+# 十三：闭包
+
+动态语言怎么可能没有这货。
+
+所谓闭包，一般是酱紫的
+
+1. 一个函数里面定义了嵌套函数
+2. 嵌套函数里面用到了外部函数的变量
+3. 外部函数将嵌套函数当做返回值返回出去
+
+这其实也是实现闭包的手段。
+
+Python的闭包有两个特点
+
+1. 即使你把外部函数用del删除了，闭包依然可以正常使用
+2. 闭包函数的值会记住外部函数的值。
+
+实现闭包的代码如下
+
+```
+def external(msg):
+    def internal():
+        print(msg)
+    return internal
+
+
+internal = external("我胡汉三又回来了")
+del external
+internal()
+
+```
+
+所以函数对象都有`__closure__`属性，如果这个函数是一个闭包，那么它的`__closure__`属性是一个容器。
+
+而容器的第一个元素就是闭包的值
+
+# 十四：装饰器
+
+以往我们在java使用装饰器，只能增强某个类的某个方法的功能。
+
+现在到了Python，可以用装饰器来装饰方法了，这主要是通过闭包来实现的
+
+实现代码
+
+```
+def log(func):
+    def wrapper(*args, **kw):
+        print('call %s():' % func.__name__)
+        return func(*args, **kw)
+    return wrapper
+
+def helloWorld():
+    print("hello,wordl")
+```
+
+使用方式
+
+```
+a = log(helloWorld)
+a()
+```
+
+这将装饰helloWorld这个方法。
+
+使其在调用`helloWorld`方法之前，先打印调用的是什么函数
+
+里面有几个特殊的点
+
+1. `*args`是一个可变参数，可接受零到无限个参数值
+
+2. `**kw`是可以关键字参数，可接受零到无穷个带参数名的参数值
+
+   结合两个点，便可以将一个函数的参数，传递到任意函数的参数上
+
+   好像也只能用在这里了。。。ORZ
+
+> 或许你也有跟我一样有一个疑问，认为装饰器没必要使用闭包，
+>
+> 装饰器函数内调用装饰代码，然后返回被装饰的函数或者执行它
+>
+> 嗯，这样确实更直观，不过呢，有一个问题，就是上面的`*args, **kw`特性就用不了了
+
+
+
+**装饰器改进版**
+
+是不是觉得使用装饰器调用方法有点不习惯。
+
+你得调用另一个方法，拿到闭包函数，再调用闭包函数，好不习惯。
+
+别急，这里有**装饰器高级版**
+
+```
+def log(func):
+    def wrapper(*args, **kw):
+        print('call %s():' % func.__name__)
+        return func(*args, **kw)
+    return wrapper
+
+@log
+def helloWorld(name):
+    print("dict",name)
+    print("hello,wordl")
+
+
+helloWorld("你个渣渣")
+```
+
+其实就是在被装饰的方法上，加上`@+装饰函数名`
+
+这样在就可以在调用原始的函数上，增强这个函数的功能了。
+
+通过这个语法，还可以为这个函数装饰多个功能。
+
+最后其实类似于拦截器，程序必须先执行所有的装饰器后，再执行真正的函数
+
+## 十五：断言
+
+在Python中使用断言，来假设你的程序能按预期进行，如果不能按预期进行，就会产生一个`AssertionError`
+
+使用语法如下
+
+```
+assert <condition>
+assert <condition>,<error message>
+```
+
+举例
+
+```
+def avg(marks):
+    assert len(marks) != 0
+    return sum(marks)/len(marks)
+
+mark1 = []
+print("Average of mark1:",avg(mark1))
+```
+
+
+
+```
+def avg(marks):
+    assert len(marks) != 0,"List is empty."
+    return sum(marks)/len(marks)
+    
+ 
+mark1 = []
+print("Average of mark1:",avg(mark1))
+```
+
+我觉得很不错哦
+
+关键是断言失败会告诉你在哪地方发生了断言失败。
+
+有了它，貌似不用再写单元测试了耶。（逃~
 
 
 
