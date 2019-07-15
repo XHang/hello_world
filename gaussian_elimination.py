@@ -1,3 +1,5 @@
+import copy
+
 import numpy
 from fractions import Fraction
 
@@ -15,13 +17,14 @@ def swap(row, max_row, matrix):
 
 
 # 说一下哈，高斯化元法致力于将主元列化为1，其他行化为0，所以是循环列的说
-def gaussian_elimination(matrix):
+def gaussian_elimination(src_matrix):
     print("原始矩阵是")
-    print_matrix(matrix)
-    rows, cols = get_col_row(matrix)
+    print_matrix(src_matrix)
+    rows, cols = get_col_row(src_matrix)
     # 遍历列，从左到右
+    matrix = copy.deepcopy(src_matrix)
     row = 0
-    for col in range(0, cols - 1):
+    for col in range(0, cols - 2):
         print("开始遍历第{}列,第{}行,矩阵是".format(col, row))
         print_matrix(matrix)
         max_row = get_maxrow_in_col(matrix, col, row)
@@ -32,7 +35,12 @@ def gaussian_elimination(matrix):
         print("交换{}行和{}行的矩阵后，矩阵是".format(row, max_row))
         swap(row, max_row, matrix)
         print_matrix(matrix)
-        fraction = Fraction(1, matrix[row][col])
+        # 要把对应的主元化成正数1
+        if matrix[row][col] < 0:
+            fraction = -(Fraction(1, matrix[row][col]))
+        else:
+            fraction = Fraction(1, matrix[row][col])
+        # 主元化1
         row_multi(matrix, fraction, row)
         print("第{}行同乘以一个数{}".format(row, fraction))
         print_matrix(matrix)
@@ -45,10 +53,11 @@ def gaussian_elimination(matrix):
             print("将第{}行的{}倍加到第{}行，并替代{}行，结果是".format(row, fraction, i, i))
             row_add_list(matrix, i, get_row_multiple(matrix, row, fraction))
             print_matrix(matrix)
+        # 行会随着循环逐步向下推进，列也会
         row = row + 1
     print("最后结果是")
     print_matrix(matrix)
-    pass
+    return matrix
 
 
 def row_multi(matrix, num, row):
@@ -119,9 +128,3 @@ def get_maxrow_in_col(matrix, col, row_index):
     return max_row
 
 
-a = [
-    [1, 5, 7],
-    [1, -2, -2]
-
-]
-gaussian_elimination(a)
