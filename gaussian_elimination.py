@@ -37,9 +37,9 @@ def gaussian_elimination(src_matrix):
         print_matrix(matrix)
         # 要把对应的主元化成正数1
         if matrix[row][col] < 0:
-            fraction = -(Fraction(1, matrix[row][col]))
+            fraction = -(1 / matrix[row][col])
         else:
-            fraction = Fraction(1, matrix[row][col])
+            fraction = (1 / matrix[row][col])
         # 主元化1
         row_multi(matrix, fraction, row)
         print("第{}行同乘以一个数{}".format(row, fraction))
@@ -49,7 +49,7 @@ def gaussian_elimination(src_matrix):
             if matrix[i][col] == 0:
                 print("矩阵主元列{}第{}行元素已经是0，不用再化简".format(col, i))
                 continue
-            fraction = -Fraction(matrix[i][col], matrix[row][col])
+            fraction = -(matrix[i][col] / matrix[row][col])
             print("将第{}行的{}倍加到第{}行，并替代{}行，结果是".format(row, fraction, i, i))
             row_add_list(matrix, i, get_row_multiple(matrix, row, fraction))
             print_matrix(matrix)
@@ -63,7 +63,7 @@ def gaussian_elimination(src_matrix):
 def row_multi(matrix, num, row):
     for i in range(len(matrix[row])):
         result = matrix[row][i] * num
-        if result.denominator == 1:
+        if isinstance(result, Fraction) and result.denominator == 1:
             matrix[row][i] = result.numerator
         else:
             matrix[row][i] = result
@@ -73,7 +73,7 @@ def row_add_list(matrix, row1, row_multi):
     """将list加到row1上面，并替代掉row1"""
     for col in range(len(matrix[0])):
         result = matrix[row1][col] + row_multi[col]
-        if result.denominator == 1:
+        if isinstance(result, Fraction) and result.denominator == 1:
             matrix[row1][col] = result.numerator
         else:
             matrix[row1][col] = result
@@ -83,7 +83,7 @@ def get_row_multiple(matrix, row, multiple):
     elements = []
     for e in matrix[row]:
         result = e * multiple
-        if result.denominator == 1:
+        if isinstance(result, Fraction) and result.denominator == 1:
             elements.append(result.numerator)
         else:
             elements.append(result)
@@ -126,5 +126,3 @@ def get_maxrow_in_col(matrix, col, row_index):
             max_value = matrix[row][col]
             max_row = row
     return max_row
-
-

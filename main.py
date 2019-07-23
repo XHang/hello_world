@@ -19,8 +19,8 @@ from vector import Vector
 # ]
 # gaussian_elimination(a)
 a = [
-    [6, -3, 1],
-    [-1, 4, -7],
-    [5, 0, -5]
+    [27.6, 30.2, 162],
+    [3100, 6400, 23610],
+    [250, 360, 1623]
 ]
 gaussian_elimination(a)
