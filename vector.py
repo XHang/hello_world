@@ -38,6 +38,7 @@ class Vector:
 
 
 def is_inear_combination(a1, a2, b):
+    """b向量是不是a1,a2的线性组合"""
     if len(a1) != len(a2) or len(a1) != len(b):
         return False
     matrix = []
@@ -48,3 +49,7 @@ def is_inear_combination(a1, a2, b):
     gaussian_elimination.print_matrix(matrix)
     print("化简矩阵")
     gaussian_elimination.print_matrix(result)
+    """暂时不可用"""
+
+
+
