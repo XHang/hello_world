@@ -1305,10 +1305,6 @@ func Test_batchDetail_ProcessLack(t *testing.T) {
 
 # X:末尾 BUG合集
 
-# 题外话
+1. 执行go mod tidy 报`verifying xxxx@v0.0.0-20190518091112-409400fe94d2/go.mod: checksum mismatch`
 
-框架的SetXXX方法调用可以置设置标识符为TRUE,以便让框架设置该值
-
-框架启动过程
-
-1. 初始化
+   
