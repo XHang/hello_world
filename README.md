@@ -1924,6 +1924,17 @@ except:
     print("其他异常捕捉", sys.exc_info()[0])
 ```
 
+**还有一种处理异常的方法**
+
+```
+try:
+...     raise Exception('spam', 'eggs')
+... except Exception as inst:
+...     print(type(inst))    # the exception instance
+```
+
+
+
 
 
 # 十二：Python对象
