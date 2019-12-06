@@ -1303,7 +1303,11 @@ func Test_batchDetail_ProcessLack(t *testing.T) {
 
 
 
+# 十六:go的正则表达式
 
+主要用的包`regexp`
+
+想知道怎么使用，以及有什么功能，可以在该项目的源码中找到
 
 
 
