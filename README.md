@@ -399,9 +399,15 @@ go提供两种浮点数
 
 go语言的字符串是可不变的
 
-可以用内建的len(str)方法计算字符串的长度
+可以用内建的len(str)方法计算字符串的**字节**长度
 
-也可以用str[index]拿到对应位置的字节
+> 字符长度这个算不出来
+
+也可以用str[index]拿到第index个**字节**的数据
+
+> 字节和字符不一样。不能相当然的认为str[index]能拿到第index个字符的数据
+>
+> 因为对于某些非ascll码的字符，会编码成多个字节。比如说中文
 
 其实换一种角度,字符串就是字符数组啦
 
@@ -739,6 +745,18 @@ func fetch(url string, ch chan<- string) {
 像这样声明的函数的通道形参，只能用于接受数据，而不能拿数据
 
 如果`ch chan<- string`改为` ch<- chan string `  则是可读，但不可写
+
+## 5.13 字符
+
+golang内部有有两种类型，来表示字符
+
+一种是byte，通常用于表示ascil字符
+
+一种是rune,通常用于表示unicode或utf-8字符
+
+> 其他的字符类型可能还有，不做保证
+
+golang内建字符编码是UTF-8，在这个编码下，一个汉字，含3个字节
 
 
 
@@ -1353,6 +1371,36 @@ func Test_batchDetail_ProcessLack(t *testing.T) {
 
 # X:末尾 BUG合集
 
-1. 执行go mod tidy 报`verifying xxxx@v0.0.0-20190518091112-409400fe94d2/go.mod: checksum mismatch`
+1. 对某个资源执行go get -u xxxx 时报
+
+   `..\xxxx\lint.go:23:2: module xxxx found (v0.0.0-20200823
+   205832-c024452afbcd), but does not contain package xxxx`
+
+   言下之意自然是
+   
+   我们找到了xxxx 模块，但是在这个模块下，没有找到xxxx
+   
+   这张情况，可能包被其他人删了，你需要找到替换包
+   
+2. go mod tidy 报
+
+   `module declares its path as: xxxx	but was required as: @#@￥#%￥`
+
+   这个原因是依赖包下载完后，发现依赖包go.mod的module声明为xxxx
+
+   但是项目里面导入的包路径是`@#@￥#%￥` 
+
+   两者不匹配，解决办法是执行
+
+   `go mod edit -replace @#@￥#%￥=xxxx@latest`
+
+   将地址重新指向
+
+3. idea莫名报
+
+   ```
+   go list -m: can't compute 'all' using the vendor directory
+   	(Use -mod=mod or -mod=readonly to bypass.)
+   ```
 
    
