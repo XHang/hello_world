@@ -1,7 +1,7 @@
 package main
 
 import (
-	"money-leak/timeticker"
+	"money-leak/finalizer"
 	_ "net/http/pprof"
 )
 
@@ -10,7 +10,7 @@ import (
 // 但实际上有几种场景是会导致内存泄露的。
 // 这个项目的几个package将会介绍内存泄露的场景
 func main() {
-	timeticker.TimeTicker.TestFix()
+	finalizer.Finalizer.Run()
 }
 
 // how to compare two functions:
