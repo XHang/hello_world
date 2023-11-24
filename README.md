@@ -62,11 +62,17 @@ go语言是Google开发的一门用于服务器编程的,具有很好并发优�
 
 2. `import "fmt"` 是导包,不过你可以忽略这个,一般的IDE会自动导,GO语言提供的工具也会帮你导
 
-3. ```go
-   func main(){
-   	 fmt.Print("你好，世界")
-   }
-   ```
+3.
+
+```go
+package example
+
+import "fmt"
+
+func main() {
+   fmt.Print("你好，世界")
+}
+```
 
    这个是一个最简单的方法了,以后你还可以看到各种千奇百怪的方法,做好准备吧
 
@@ -1520,7 +1526,8 @@ GOGC会尽量满足这个时间，但是带来的后果GO GC会延迟执行，�
 嘿，在你jump到GC调优之前，请确定GC 确实是吃最多资源的哪一位
 怎么确定呢？
 
-1. **CPU profiles**
+#### CPU profiles
+了解GC的饭量，看CPU profiles是一个很好的
 
 ### 一
 当
