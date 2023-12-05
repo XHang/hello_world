@@ -1527,9 +1527,150 @@ GOGC会尽量满足这个时间，但是带来的后果GO GC会延迟执行，�
 怎么确定呢？
 
 #### CPU profiles
-了解GC的饭量，看CPU profiles是一个很好的
+了解GC的饭量，看CPU profiles是一个很好的开始。  
+不过如果你没学过相关知识，看CPU profiles就是两眼一抹黑。    
+幸运的是，只要你能理解`rumetime`包里面各个函数的作用，也就能理解GC在CPU profiles里面扮演的角色了。  
+但是，先别急。让我们先看看如何拿到CPU profiles
 
-### 一
+ ##### 开启profiles
+
+第一步是开启profiling。这个功能已经被内置在go test 里面了。
+你可以通过以下命令行来对当前包下面所有测试函数，运行一个benchmark，同时将cpu和menory的profile写入到cpu.prof和mem.prof里面
+```
+go test -cpuprofile cpu.prof -memprofile mem.prof -bench .
+```
+如果想为标准的golang应用程序实现同样的效果
+两种选择
+1. 添加下面的代码到你的主程序下
+```
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to `file`")
+var memprofile = flag.String("memprofile", "", "write memory profile to `file`")
+
+func main() {
+    flag.Parse()
+    if *cpuprofile != "" {
+        f, err := os.Create(*cpuprofile)
+        if err != nil {
+            log.Fatal("could not create CPU profile: ", err)
+        }
+        defer f.Close() // error handling omitted for example
+        if err := pprof.StartCPUProfile(f); err != nil {
+            log.Fatal("could not start CPU profile: ", err)
+        }
+        defer pprof.StopCPUProfile()
+    }
+
+    // ... rest of the program ...
+
+    if *memprofile != "" {
+        f, err := os.Create(*memprofile)
+        if err != nil {
+            log.Fatal("could not create memory profile: ", err)
+        }
+        defer f.Close() // error handling omitted for example
+        runtime.GC() // get up-to-date statistics
+        if err := pprof.WriteHeapProfile(f); err != nil {
+            log.Fatal("could not write memory profile: ", err)
+        }
+    }
+}
+```
+
+2. 导入包 `import _ "net/http/pprof"`.这样访问`/debug/pprof/`就可以下载实时的profiles
+
+##### 分析profile
+执行以下指令就可以
+`go tool pprof cpu.prof`
+这将开启一个命令行交互，可以键入不同的命令来查询分析结果，比如
+1. `top`： 打印程序热点图
+2. web，打印程序热点图，但是是图表形式，以及它们的调用链
+3. help 不解释
+这会展示最耗资源的被调用函数是哪一个。
+
+注意在打印出来的结果中，看看有没有以下函数调用（如果有，说明GC吃了蛮多的资源）
+
+###### runtime.gcBgMarkWorker
+
+这个是GC 标记协程的入口，花费在这里的时间与GC的频率，复杂度以及堆大小都成比例关系，它代表着花费在扫描和标记上的基准时间（baseline）
+
+在这些协程内，你可能还会发现以下函数的调用
+1. `runtime.gcDrainMarkWorkerDedicated`
+2. `runtime.gcDrainMarkWorkerFractional`
+3. `runtime.gcDrainMarkWorkerIdle`
+
+这标记着Worker的类型。其中注意一下这个`gcDrainMarkWorkerIdle`
+当一个应用程序有比较多的空闲时间（idle）时，Worker会充分利用这些空闲时间来使它能更快完成工作。具体表现上，就是gcDrainMarkWorkerIdle会在CPU的采样中占据较大的份额。
+因为GC认为idle的时间是free，用它完全不心疼。
+但是如果应用程序比较活跃的情况下，idle时间就会比较少。
+这种情况常见于应用程序完全在一个协程上工作，但是`GOMAXPROCS`大于1
+
+###### **`runtime.mallocgc`**
+这是分配内存的入口，很明显，如果这里花费的时间多，那就意味着有大量的内存被分配出来了
+
+
+###### **`runtime.gcAssistAlloc`**
+这个函数是用于将当前的协程暂停，挤出时间给GC的扫描和标记线程。
+如果花费在这里的时间过多，意味着
+1. 应用程序分配内存速度高于GC回收内存的速度。
+2. 应用程序将受到GC执行的影响
+3. 代表着GC扫描和标记的时间
+
+注意的是，这个函数其实在`runtime.mallocgc` 调用树里面。
+意味着如果gcAssistAlloc花费的时间多，那么runtime.mallocgc 的花费时间也会膨胀
+
+#### **Execution traces**
+尽管cpu profile 可以看出哪个函数花的时间最多，但是在涉及延迟上更细微的细节上，cpu profile 用处就不大。这个时候，可以考虑开启`Execution traces`
+好处
+1. 它可以对程序执行的一段短暂时间，提供丰富和深入的视角
+2. 提供了多种事件，比如说协程的创建，堵塞，以及GC 的触发，堆内存容量的变更等
+3. 可以直观看到执行路径
+4. 还有应用程序如何和GC协作
+
+有关于更多详情，参阅 [HERE](https://pkg.go.dev/runtime/trace)
+
+#### **GC traces**
+如果上述都没有起到作用的话，考虑试试这个。它提供了另外几种不同的traces,可以帮助你更好的理解GC的行为。
+这些trace 会被打印到`STDERR`.每个GC周期打印一行
+尽管理解这些traces需要对GC的实现有较深刻的认识，不过有时它也能提供一些有用的线索。
+你可以通过设置`GODEBUG=gctrace=1` 来启用它
+
+
+还有一个起到互补作用的`pacer trace`. 这个输出的数据更加的深入。
+但是要求你对GC的`pacer` 有深入的理解
+具体可以看看[这里]([additional resources](https://tip.golang.org/doc/gc-guide#Additional_resources))
+可以通过`GODEBUG=gcpacertrace=1` 开启
+
+
+
+
+
+
+
+
+
+### 为GC节食
+GC吃这么胖，这样下去是不行的，得好好的整治这个偷吃的胖子
+下面是几个节食策略
+
+#### 削减分配
+正如之前提到的，高内存分配导致高频率的GC.
+那么，如果能一开始就让GC不要管那么多的内存那就好了。
+总之，一旦识别到GC的吃的最多的那个胖子，剩下的就是找找这些吃的从哪来。
+在这种情况下， memory profile 是一个非常有用的功能
+看看[这里](https://pkg.go.dev/runtime/pprof#hdr-Profiling_a_Go_program)来开始使用这个功能吧。
+memory profile 会展示分配的内存都是从哪来，并将它们标识在`stack trace`上。
+每一个memory profile都包含一下内容
+1.  inuse_objects： 目前活跃的对象数
+2. inuse_space： 目前活跃对象占据的内存大小 
+3. alloc_objects： 自程序运行以来分配的对象数
+4. alloc_space： 自程序运行以来分配的内存大小
+5. 
+
+
+
+
+### 未雨绸缪
+#### 一
 当
    - 应用程序的执行环境完全由你控制
    - golang程序是唯一一个访问环境内资源的（比如说在容器内）
@@ -1537,11 +1678,11 @@ GOGC会尽量满足这个时间，但是带来的后果GO GC会延迟执行，�
 一个典型的例子就是在容器内跑的web服务器
 
 ****
-### 二
+#### 二
 实时地调整memory limit去适配改变。
 一个典型的例子是一个突然临时需要很多资源的CGO程序
 
-### 三
+#### 三
 当：
 - 当go程序和其他的应用程序共享内存
 - 其他程序完全和go程序解耦
@@ -1551,7 +1692,7 @@ GOGC会尽量满足这个时间，但是带来的后果GO GC会延迟执行，�
 特别的：虽然为机器内的其他应用程序预留内存，这种做法听起来不错。但是除非go程序和其他应用程序完全同步（也就是其他应用程序的执行会堵塞go程序的执行，反之亦然）。
 否则不要自作聪明，当go程序不需要更多内存的时候，就让它使用更少的内存。这样子会更合理
 
-### 四
+#### 四
 当：应用程序所部署的环境你完全无法控制的情况下
 则：不要设置memory limit.
 尤其是：你的应用程序内存的占用和输入成正比例关系
@@ -1559,7 +1700,7 @@ GOGC会尽量满足这个时间，但是带来的后果GO GC会延迟执行，�
 一个典型的例子：
 CLI程序或者桌面程序。当不确定它的输入是哪种形式的时候，冒然设置memory limit可能会导致使人困惑的崩溃
 
-### 五
+#### 五
 不要试图设置memory limit去避免内存溢出的问题。
 因为：这只是简单地把应用程序调慢来避免内存溢出的风险罢了，这不是一个好交易
 合适的做法可以是
